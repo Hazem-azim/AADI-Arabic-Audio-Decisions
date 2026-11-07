@@ -1,0 +1,8 @@
+# Install a CUDA-compatible PyTorch build separately.
+# GB10 reference environment: PyTorch 2.13.0+cu130
+
+transformers==5.19.0
+fastapi
+uvicorn[standard]
+numpy
+pydantic
