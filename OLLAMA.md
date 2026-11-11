@@ -109,6 +109,7 @@ AADI_OLLAMA_MODEL=lfm3-audio:latest uv run --with fastapi --with 'uvicorn[standa
    - Only one update runs at a time, and the next one always takes the newest audio, so it never builds a backlog.
    - **Stopping the microphone** cancels any update still running and immediately decides on the audio up to the click. By default this final decision hears the **whole recording** (up to 30 s), so it has the full context; a final on 18 s of audio takes ~3 s. Untick the option to judge only the last window instead (~1.5 s). Final decisions are marked "Final" and outlined in the timeline.
    - Updates are driven by the audio itself, not the page's animation loop, so they keep running when the tab is in the background.
+   - Microphone mode has been tested with a live microphone in Chrome on macOS.
    - Cards show every option's probability, the winner, its confidence and a colour timeline of earlier decisions.
    - Results can be downloaded as JSON.
 3. **Model picker** in the header: switch between the local audio models. A switch stops any running test, and the badge shows "Loading model…" until the new model is ready.
@@ -134,4 +135,3 @@ These are small sanity checks, not a benchmark.
 - **Confidence isn't calibrated.** One wrong FLEURS answer had 0.98 confidence.
 - **Silence and dialect are weak spots.** On silence the model still tends to say speech is present, though with lower confidence. Dialect identification was unreliable.
 - **One model for everyone.** The selected model is global to the server, not per client.
-- **Microphone mode** was tested with a recording fed in as the microphone, not with a live microphone.
