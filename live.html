@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AADI Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070d1a; --panel:#0e1729; --panel2:#13203a; --line:#1e2d4a; --line2:#2a3d61;
+  --text:#e6edf7; --muted:#8a9bb8; --dim:#5b6c8a;
+  --accent:#2dd4bf; --accent-ink:#04201c; --warn:#fbbf24; --err:#f87171; --ok:#34d399;
+  --c0:#2dd4bf; --c1:#60a5fa; --c2:#f472b6; --c3:#fbbf24; --c4:#a78bfa; --c5:#fb923c; --c6:#4ade80; --c7:#f87171;
+  --radius:14px;
+  font-family: Inter, "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+[dir=auto],.ar{font-family:"IBM Plex Sans Arabic",Inter,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1600px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#14b8a6,#0e7490);display:grid;place-items:center}
+.logo h1{margin:0;font-size:20px;letter-spacing:.12em}
+.logo small{display:block;color:var(--muted);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.badges{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.badge{border:1px solid var(--line2);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.badge.ok{color:var(--accent);border-color:#155e57}.badge.ok .dot{background:var(--accent)}
+.badge.bad{color:var(--err);border-color:#7f1d1d}.badge.bad .dot{background:var(--err)}
+.badge.warm{color:var(--warn);border-color:#78350f}.badge.warm .dot{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.modelpick{display:flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:999px;padding:3px 4px 3px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.modelpick select{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:4px 10px;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text);max-width:260px}
+.modelpick select:disabled{opacity:.5}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.hero h2{margin:0;font-size:24px}.hero h2 span{color:var(--accent)}
+.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.steps{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);padding:4px;border-radius:12px}
+.steps button{border:0;background:none;padding:8px 14px;border-radius:9px;color:var(--muted);font-weight:600}
+.steps button.on{background:var(--panel2);color:var(--text)}
+.steps button b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--line2);font-size:11px;margin-right:6px}
+.steps button.on b{background:var(--accent);color:var(--accent-ink)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.btn{border:1px solid var(--line2);background:var(--panel2);padding:8px 14px;border-radius:10px;font-weight:600;font-size:13px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:none}
+.btn.danger{color:var(--err)}
+.hidden{display:none!important}
+
+/* ---------- setup ---------- */
+#setup{display:grid;grid-template-columns:280px 1fr;gap:14px}
+.presets{padding:14px;align-self:start}
+.presets h3,.qhead h3{margin:0 0 10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.preset{width:100%;text-align:left;background:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.preset:hover{border-color:var(--line2)}
+.preset.on{border-color:var(--accent);background:#0b2a2a}
+.preset b{display:block;font-size:13px}.preset span{font-size:12px;color:var(--muted)}
+.io{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.qhead h3{margin:0}
+.qhead .count{color:var(--dim);font-size:12px}
+.qhead .sp{flex:1}
+#qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
+.qcard{padding:14px;display:flex;flex-direction:column;gap:10px}
+.qcard .top{display:flex;gap:8px;align-items:center}
+.num{width:30px;height:30px;border-radius:9px;background:#0b2a2a;color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.qcard select{background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:6px 8px}
+.qcard .x{margin-left:auto;background:none;border:0;color:var(--dim);font-size:18px}
+.qcard .x:hover{color:var(--err)}
+.qcard label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.qcard input,.qcard textarea{width:100%;background:#0a1222;border:1px solid var(--line2);border-radius:9px;padding:9px 10px;resize:vertical}
+.qcard input:focus,.qcard textarea:focus{outline:none;border-color:var(--accent)}
+.qcard textarea{min-height:110px;line-height:1.6}
+.hint{font-size:12px;color:var(--dim)}
+.err{font-size:12px;color:var(--err)}
+.fixed{font-size:13px;color:var(--muted);background:#0a1222;border:1px dashed var(--line2);border-radius:9px;padding:9px 10px}
+.addq{border:1px dashed var(--line2);border-radius:var(--radius);background:none;color:var(--muted);min-height:120px;font-weight:600}
+.addq:hover{color:var(--accent);border-color:var(--accent)}
+
+/* ---------- live ---------- */
+#live{display:grid;grid-template-columns:1fr minmax(360px,520px) 1fr;gap:14px;align-items:start}
+.col{display:flex;flex-direction:column;gap:14px}
+.stage{padding:12px;display:flex;flex-direction:column;gap:10px}
+.stage .bar{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stage .bar .live{color:var(--accent)}
+.media{background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center;position:relative}
+.media video{width:100%;height:100%;object-fit:contain;display:block}
+.media .empty{color:var(--dim);text-align:center;padding:20px}
+.media .micviz{width:100%;height:100%}
+.src{display:flex;gap:8px;flex-wrap:wrap}
+.src .btn{flex:1}
+.src .btn.on{border-color:var(--accent);color:var(--accent)}
+.wave{position:relative;height:64px;background:#0a1222;border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer}
+.wave canvas{width:100%;height:100%;display:block}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.controls .time{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px;min-width:110px}
+.controls select{background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:7px 9px}
+.round{width:46px;height:46px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.round:disabled{opacity:.35;cursor:not-allowed}
+.round.sec{background:var(--panel2);color:var(--text);border:1px solid var(--line2);width:40px;height:40px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#0a1222;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
+.stat span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.log{max-height:150px;overflow:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted);background:#0a1222;border:1px solid var(--line);border-radius:10px;padding:8px}
+.log div{white-space:nowrap}
+.log .e{color:var(--err)}
+
+.dcard{padding:14px;display:flex;flex-direction:column;gap:10px;transition:border-color .3s}
+.dcard.flash{border-color:var(--accent)}
+.dcard .top{display:flex;gap:10px;align-items:flex-start}
+.dcard .qt{flex:1;text-align:right;font-weight:600;font-size:15px;line-height:1.5}
+.dcard .qt small{display:block;font-weight:500;font-size:10px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;font-family:Inter,sans-serif}
+.dcard .verdict{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.dcard .verdict .v{font-size:20px;font-weight:700;color:var(--accent)}
+.dcard .verdict .v.wait{color:var(--dim);font-size:15px;letter-spacing:.1em;text-transform:uppercase;font-family:Inter,sans-serif}
+.dcard .verdict .c{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.opt{display:grid;grid-template-columns:44px 1fr minmax(70px,40%);align-items:center;gap:10px;font-size:13px}
+.opt .p{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.opt .track{height:7px;background:#0a1222;border-radius:4px;overflow:hidden}
+.opt .fill{height:100%;width:0;background:var(--line2);border-radius:4px;transition:width .5s ease}
+.opt .lbl{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt.win .fill{background:var(--accent)}.opt.win .lbl{color:var(--accent);font-weight:600}.opt.win .p{color:var(--text)}
+.timeline{display:flex;gap:3px;flex-wrap:wrap;min-height:12px}
+.chip{width:14px;height:12px;border-radius:3px;background:var(--line);position:relative}
+.chip.low{opacity:.45}
+.chip.final{outline:1.5px solid var(--text);outline-offset:1px}
+.finalopt{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.finalopt input{accent-color:var(--accent)}
+.dfoot{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3b1111;border:1px solid #7f1d1d;color:#fecaca;padding:10px 16px;border-radius:10px;font-size:13px;max-width:90vw;z-index:9}
+@media (max-width:1100px){
+  #live{grid-template-columns:1fr}
+  #live .stagecol{order:-1}
+  #setup{grid-template-columns:1fr}
+}
+@media (max-width:520px){.wrap{padding:12px 16px}#qlist{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></div>
+      <div><h1>AADI</h1><small>Arabic Audio Decision Intelligence</small></div>
+    </div>
+    <div class="badges">
+      <label class="modelpick" title="Local Ollama models that accept audio">Model
+        <select id="modelSel"><option>Loading…</option></select></label>
+      <div class="badge" id="engineBadge"><span class="dot"></span><span id="engineText">Checking engine…</span></div>
+      <div class="badge">Logit decisions · 1 token</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h2>Listen to Arabic audio. <span>See decisions live.</span></h2>
+      <p>Define the decisions first, then play a video, an audio file or your microphone. Every 1–3 seconds the last few seconds of audio are scored against each question.</p>
+    </div>
+    <div class="steps">
+      <button id="tabSetup" class="on"><b>1</b>Decisions</button>
+      <button id="tabLive"><b>2</b>Live test</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 1: SETUP ============ -->
+  <section id="setup">
+    <aside class="panel presets">
+      <h3>Start from an example</h3>
+      <div id="presetList"></div>
+      <div class="io">
+        <button class="btn ghost" id="exportBtn">Export JSON</button>
+        <button class="btn ghost" id="importBtn">Import JSON</button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </aside>
+    <div>
+      <div class="qhead">
+        <h3>Decision questions</h3><span class="count" id="qcount"></span>
+        <span class="sp"></span>
+        <span class="err" id="setupErr"></span>
+        <button class="btn primary" id="toLive">Continue to live test →</button>
+      </div>
+      <div id="qlist"></div>
+    </div>
+  </section>
+
+  <!-- ============ STEP 2: LIVE ============ -->
+  <section id="live" class="hidden">
+    <div class="col" id="colL"></div>
+    <div class="col stagecol">
+      <div class="panel stage">
+        <div class="bar"><span class="live">● Live feed</span><span style="margin-left:auto" id="srcName">No source</span></div>
+        <div class="media" id="media"><div class="empty">Choose a video or audio file, or use the microphone.</div></div>
+        <div class="src">
+          <button class="btn" id="pickFile">⬆ Video / audio file</button>
+          <button class="btn" id="useMic">🎙 Microphone</button>
+          <input type="file" id="fileIn" accept="video/*,audio/*" hidden>
+        </div>
+        <div class="wave" id="wave" title="Click to seek"><canvas id="waveCv"></canvas></div>
+        <div class="controls">
+          <button class="round" id="playBtn" disabled title="Start"><svg id="playIco" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+          <button class="round sec" id="resetBtn" title="Restart and clear decisions"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <div class="time" id="clock">00:00</div>
+          <label class="hint" style="margin-left:auto" for="hop">Every</label>
+          <select id="hop"><option value="1">1 s</option><option value="2" selected>2 s</option><option value="3">3 s</option><option value="5">5 s</option><option value="10">10 s</option></select>
+          <label class="hint" for="win">hear last</label>
+          <select id="win"><option value="3">3 s</option><option value="5">5 s</option><option value="8" selected>8 s</option><option value="10">10 s</option><option value="15">15 s</option><option value="20">20 s</option><option value="30">30 s</option></select>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="stSeg">0</b><span>updates</span></div>
+          <div class="stat"><b id="stLat">–</b><span>time per update</span></div>
+          <div class="stat"><b id="stLag">–</b><span>lag behind audio</span></div>
+        </div>
+        <label class="finalopt"><input type="checkbox" id="finalAll" checked> When the microphone stops, give a final decision on the whole recording (up to 30 s)</label>
+        <div class="log" id="log"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="backSetup">← Edit decisions</button>
+          <button class="btn ghost" id="dlResults" style="margin-left:auto">Download results</button>
+        </div>
+      </div>
+    </div>
+    <div class="col" id="colR"></div>
+  </section>
+</div>
+
+<script>
+"use strict";
+const SR = 16000;
+const COLORS = ["--c0","--c1","--c2","--c3","--c4","--c5","--c6","--c7"].map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = t => { t = Math.max(0, t|0); return String(t/60|0).padStart(2,"0")+":"+String(t%60).padStart(2,"0"); };
+
+/* ------------------------------------------------------------------ presets */
+const PRESETS = [
+  { name:"Talk show commentary", desc:"Topic, tone and language of a TV commentator", questions:[
+    {type:"choice", text:"بيتكلم عن إيه؟", options:["سياسة داخلية","اقتصاد وأسعار","أمن وشرطة","علاقات خارجية","رياضة","قضايا اجتماعية"]},
+    {type:"noul",   text:"هل المتحدث بيزعق ومنفعل؟"},
+    {type:"choice", text:"موقف المتحدث من الموضوع؟", options:["بيمدح ويؤيد","بينتقد ويهاجم","محايد وبيعرض معلومات"]},
+    {type:"score",  text:"مستوى الانفعال في الكلام", options:["هادئ","متحمس","غاضب جداً"]},
+    {type:"noul",   text:"هل فيه شتيمة أو ألفاظ خارجة؟"},
+  ]},
+  { name:"Customer service call", desc:"Call reason, mood and escalation", questions:[
+    {type:"choice", text:"ما سبب اتصال العميل؟", options:["مشكلة في الفاتورة","عطل فني","إلغاء الاشتراك","استفسار عن خدمة","شكوى من موظف"]},
+    {type:"score",  text:"مدى غضب العميل", options:["هادئ وراضٍ","منزعج قليلاً","غاضب","غاضب جداً ويهدد"]},
+    {type:"noul",   text:"هل يجب تحويل المكالمة لمشرف؟"},
+    {type:"noul",   text:"هل تم حل مشكلة العميل في المكالمة؟"},
+  ]},
+  { name:"Meeting & scheduling", desc:"Did they agree, and when?", questions:[
+    {type:"noul",   text:"هل اتفق المتحدثون على موعد للقاء؟"},
+    {type:"choice", text:"في أي يوم سيلتقون؟", options:["السبت","الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","لم يتفقوا"]},
+    {type:"choice", text:"في أي فترة من اليوم؟", options:["الصباح","الظهر","العصر","المساء","لم يُحدد"]},
+    {type:"score",  text:"مدى وضوح الموعد", options:["لم يُذكر موعد","ذُكر اليوم أو الساعة فقط","ذُكر اليوم والساعة بوضوح"]},
+  ]},
+  { name:"Sports commentary", desc:"What is happening in the match", questions:[
+    {type:"choice", text:"ما الذي يحدث في المباراة الآن؟", options:["هجمة خطيرة","هدف","ضربة جزاء","خطأ أو بطاقة","تبديل لاعبين","تحليل هادئ"]},
+    {type:"noul",   text:"هل أعلن المعلق عن هدف؟"},
+    {type:"score",  text:"حماس المعلق", options:["هادئ","متحمس","منفعل جداً"]},
+  ]},
+  { name:"News topic", desc:"Classify what a news segment is about", questions:[
+    {type:"choice", text:"ما موضوع الكلام في المقطع؟", options:["الطقس","المواصلات والسفر","التعليم","الطبيعة والحيوانات","الرياضة","الانتخابات والسياسة","الصحة","العلوم والفضاء"]},
+    {type:"choice", text:"ما لهجة المتحدث؟", options:["مصرية","خليجية","شامية","مغاربية","فصحى"]},
+    {type:"noul",   text:"هل يُذكر رقم أو تاريخ في المقطع؟"},
+  ]},
+  { name:"Blank", desc:"Start from scratch", questions:[ {type:"choice", text:"", options:["",""]} ]},
+];
+
+/* ------------------------------------------------------------------ question model */
+// question = {type:"choice"|"noul"|"score", text, options:[string]}; for choice an option may be "label :: hint"
+let questions = [];
+let presetIdx = 0;
+const LS_KEY = "aadi-live-questions-v1";
+
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (s && Array.isArray(s.questions)) { questions = s.questions; presetIdx = s.preset ?? -1; return; } } catch {}
+  usePreset(0, false);
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify({questions, preset:presetIdx})); } catch {} }
+function usePreset(i, render=true) {
+  presetIdx = i;
+  questions = JSON.parse(JSON.stringify(PRESETS[i].questions));
+  save(); if (render) renderSetup();
+}
+
+function parseOpt(s) { const [label, ...rest] = s.split("::"); return {label:label.trim(), hint:rest.join("::").trim()}; }
+
+function validate(q) {
+  const errs = [];
+  if (!q.text.trim()) errs.push("Write the question.");
+  if (q.text.length > 500) errs.push("Question is longer than 500 characters.");
+  if (q.type !== "noul") {
+    const opts = q.options.map(s => s.trim()).filter(Boolean);
+    if (opts.length < 2 || opts.length > 8) errs.push("Give 2 to 8 options.");
+    const labels = q.type === "choice" ? opts.map(o => parseOpt(o).label) : opts;
+    if (new Set(labels).size !== labels.length) errs.push("Options must be different.");
+    opts.forEach((o, i) => {
+      const len = q.type === "choice" ? (parseOpt(o).hint ? parseOpt(o).label.length + 2 + parseOpt(o).hint.length : parseOpt(o).label.length)
+                                      : ("Score " + i + ": " + o).length;
+      if (len > 100) errs.push(`Option ${i+1} is too long (max 100 characters incl. hint).`);
+    });
+  }
+  return errs;
+}
+
+function payloadQuestions() {
+  const out = {};
+  questions.forEach((q, i) => {
+    const id = "q" + (i+1);
+    if (q.type === "noul") out[id] = {type:"noul", instructions:q.text.trim()};
+    else if (q.type === "choice") {
+      const crit = {};
+      q.options.map(s => s.trim()).filter(Boolean).forEach(o => { const p = parseOpt(o); crit[p.label] = p.hint || null; });
+      out[id] = {type:"choice", instructions:q.text.trim(), criteria:crit};
+    } else out[id] = {type:"score", instructions:q.text.trim(), criteria:q.options.map(s => s.trim()).filter(Boolean)};
+  });
+  return out;
+}
+
+// display labels for a question, keyed the way the API returns probabilities
+function optionView(q) {
+  if (q.type === "noul") return [{key:"Yes", label:"نعم"}, {key:"No", label:"لا"}];
+  const opts = q.options.map(s => s.trim()).filter(Boolean);
+  if (q.type === "choice") return opts.map(o => { const l = parseOpt(o).label; return {key:l, label:l}; });
+  return opts.map((o, i) => ({key:String(i), label:o}));
+}
+
+/* ------------------------------------------------------------------ setup UI */
+const TYPE_INFO = {
+  choice:{name:"Multiple choice", hint:"One option per line (2–8). Optional hint for the model after “::”, e.g. «تطبيل :: مدح مبالغ فيه للحكومة»."},
+  noul:  {name:"Yes / No", hint:""},
+  score: {name:"Score (ordered)", hint:"Levels from lowest to highest, one per line (2–8)."},
+};
+
+function renderSetup() {
+  $("presetList").innerHTML = PRESETS.map((p, i) =>
+    `<button class="preset ${i===presetIdx?"on":""}" data-i="${i}"><b>${esc(p.name)}</b><span>${esc(p.desc)} · ${p.questions.length} q</span></button>`).join("");
+  $("qcount").textContent = `${questions.length} / 8`;
+  $("qlist").innerHTML = questions.map((q, i) => {
+    const errs = validate(q);
+    return `<div class="panel qcard" data-i="${i}">
+      <div class="top"><div class="num">${String(i+1).padStart(2,"0")}</div>
+        <select data-f="type">${Object.entries(TYPE_INFO).map(([k,v]) => `<option value="${k}" ${q.type===k?"selected":""}>${v.name}</option>`).join("")}</select>
+        <button class="x" data-act="del" title="Remove question">×</button></div>
+      <div><label>Question</label><input dir="auto" data-f="text" value="${esc(q.text)}" placeholder="مثال: هل المتحدث غاضب؟"></div>
+      ${q.type === "noul"
+        ? `<div class="fixed">Answers: <b>نعم / Yes</b> · <b>لا / No</b></div>`
+        : `<div><label>${q.type==="score"?"Levels (low → high)":"Options"}</label><textarea dir="auto" data-f="options" placeholder="خيار في كل سطر">${esc(q.options.join("\n"))}</textarea>
+           <div class="hint">${TYPE_INFO[q.type].hint}</div></div>`}
+      ${errs.length ? `<div class="err">${errs.map(esc).join(" ")}</div>` : ""}
+    </div>`;
+  }).join("") + (questions.length < 8 ? `<button class="addq" id="addQ">+ Add a question</button>` : "");
+  updateSetupState();
+}
+
+function updateSetupState() {
+  const bad = questions.length === 0 || questions.some(q => validate(q).length);
+  $("toLive").disabled = bad;
+  $("setupErr").textContent = questions.length === 0 ? "Add at least one question." : (bad ? "Fix the highlighted questions." : "");
+}
+
+$("presetList").addEventListener("click", e => { const b = e.target.closest(".preset"); if (b) usePreset(+b.dataset.i); });
+$("qlist").addEventListener("click", e => {
+  if (e.target.id === "addQ") { questions.push({type:"choice", text:"", options:["",""]}); presetIdx = -1; save(); renderSetup(); return; }
+  if (e.target.dataset.act === "del") { questions.splice(+e.target.closest(".qcard").dataset.i, 1); presetIdx = -1; save(); renderSetup(); }
+});
+$("qlist").addEventListener("input", e => {
+  const card = e.target.closest(".qcard"); if (!card) return;
+  const q = questions[+card.dataset.i], f = e.target.dataset.f;
+  if (f === "text") q.text = e.target.value;
+  else if (f === "options") q.options = e.target.value.split("\n");
+  presetIdx = -1; save();
+  // refresh only this card's error line without re-rendering (keeps cursor)
+  const errs = validate(q); let el = card.querySelector(".err");
+  if (!errs.length && el) el.remove();
+  else if (errs.length) { if (!el) { el = document.createElement("div"); el.className = "err"; card.appendChild(el); } el.textContent = errs.join(" "); }
+  document.querySelectorAll(".preset.on").forEach(p => p.classList.remove("on"));
+  updateSetupState();
+});
+$("qlist").addEventListener("change", e => {
+  if (e.target.dataset.f !== "type") return;
+  const q = questions[+e.target.closest(".qcard").dataset.i];
+  q.type = e.target.value;
+  if (q.type !== "noul" && (!q.options || q.options.length < 2)) q.options = ["",""];
+  presetIdx = -1; save(); renderSetup();
+});
+$("exportBtn").onclick = () => download("aadi-questions.json", JSON.stringify({questions}, null, 2));
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = async e => {
+  try {
+    const d = JSON.parse(await e.target.files[0].text());
+    const qs = (d.questions || d).filter(q => q && ["choice","noul","score"].includes(q.type)).slice(0, 8)
+      .map(q => ({type:q.type, text:String(q.text||""), options:(q.options||[]).map(String)}));
+    if (!qs.length) throw new Error("no questions found");
+    questions = qs; presetIdx = -1; save(); renderSetup();
+  } catch (err) { toast("Could not import: " + err.message); }
+  e.target.value = "";
+};
+
+/* ------------------------------------------------------------------ steps */
+function showStep(live) {
+  $("setup").classList.toggle("hidden", live); $("live").classList.toggle("hidden", !live);
+  $("tabSetup").classList.toggle("on", !live); $("tabLive").classList.toggle("on", live);
+  if (live) { buildDecisionCards(); drawWave(); }
+}
+$("tabSetup").onclick = $("backSetup").onclick = () => { stopAll(); showStep(false); };
+$("tabLive").onclick = $("toLive").onclick = () => { if (!$("toLive").disabled) showStep(true); else toast("Fix the decision questions first."); };
+
+/* ------------------------------------------------------------------ engine status */
+let healthTimer = null;
+async function checkHealth() {
+  clearTimeout(healthTimer);
+  let warming = false;
+  try {
+    const r = await fetch("/health"); const d = await r.json();
+    warming = r.ok && d.status === "warming";
+    const ok = r.ok && d.status === "ready";
+    $("engineBadge").className = "badge " + (ok ? "ok" : warming ? "warm" : "bad");
+    $("engineText").textContent =
+        ok ? `Ready · ${d.warm_up_seconds != null ? "loaded in " + d.warm_up_seconds + " s" : "ollama"}`
+      : warming ? "Loading model…"
+      : d.status === "model_has_no_audio" ? "Model has no audio input"
+      : (d.error || d.detail || d.status || "Engine not ready");
+    $("engineBadge").title = d.error || "";
+    if (d.model && $("modelSel").value !== d.model && !modelSwitching) selectModelOption(d.model);
+  } catch { $("engineBadge").className = "badge bad"; $("engineText").textContent = "AADI server unreachable"; }
+  healthTimer = setTimeout(checkHealth, warming ? 1000 : 15000);   // poll fast while loading
+}
+
+/* ------------------------------------------------------------------ model picker */
+let modelSwitching = false;
+function selectModelOption(name) {
+  const sel = $("modelSel");
+  if (![...sel.options].some(o => o.value === name)) sel.add(new Option(name, name));
+  sel.value = name;
+}
+async function loadModels() {
+  try {
+    const r = await fetch("/models"); const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || "could not list models");
+    const sel = $("modelSel"); sel.innerHTML = "";
+    d.models.forEach(m => sel.add(new Option(
+      `${m.name}${m.name === d.default ? " (default)" : ""}${m.size_gb ? " · " + m.size_gb + " GB" : ""}`, m.name)));
+    if (!d.models.length) sel.add(new Option("No audio models in Ollama", ""));
+    selectModelOption(d.current);
+  } catch (err) { $("modelSel").innerHTML = `<option>${esc(err.message)}</option>`; }
+}
+$("modelSel").onchange = async e => {
+  const name = e.target.value; if (!name) return;
+  stopAll();                      // don't mix two models in one run
+  modelSwitching = true; e.target.disabled = true;
+  $("engineBadge").className = "badge warm"; $("engineText").textContent = "Loading model…";
+  try {
+    const r = await fetch("/model", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({model: name})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || "could not switch model");
+    log(`Model switched to ${name}`);
+  } catch (err) { toast("Model not switched: " + err.message); }
+  modelSwitching = false; e.target.disabled = false;
+  checkHealth();
+};
+
+/* ------------------------------------------------------------------ live state */
+// Sliding window: every `hop` seconds the last `win` seconds of audio are scored.
+// Only one update runs at a time; when it finishes, the next one always takes the
+// freshest audio, so the view never falls behind with a queue.
+let mode = null;           // "file" | "mic"
+let mediaEl = null, pcm = null, srcName = "";
+let micCtx = null, micStream = null, micProc = null, micChunks = [], micRate = 48000, micStart = 0, micLevel = 0;
+let running = false, inflight = false, lastSendAt = -1e9, finalWanted = false, session = 0;
+let segs = [];             // {i,start,end,status,ms,lag,answers}
+let lats = [], lags = [], sessionQs = null;
+const hop = () => +$("hop").value;
+const win = () => +$("win").value;
+const MAX_CHIPS = 60;
+const FINAL_MAX_SEC = 29.9;   // server accepts up to 30 s per request
+// First decision only once there is enough audio to judge (a 1 s clip is mostly a guess).
+const minFirst = () => Math.min(win(), 3);
+
+function buildDecisionCards() {
+  sessionQs = JSON.parse(JSON.stringify(questions));
+  const half = Math.ceil(sessionQs.length / 2);
+  const card = (q, i) => {
+    const typeName = {choice:"Multiple choice", noul:"Yes / No", score:"Score"}[q.type];
+    return `<div class="panel dcard" id="dc${i}">
+      <div class="top"><div class="num">${String(i+1).padStart(2,"0")}</div>
+        <div class="qt" dir="auto">${esc(q.text)}<small>${typeName}</small></div></div>
+      <div class="verdict"><span class="c" id="dcC${i}">–</span><span class="v wait" id="dcV${i}" dir="auto">Awaiting audio</span></div>
+      <div>${optionView(q).map((o, j) => `<div class="opt" data-k="${esc(o.key)}"><span class="p">–</span><div class="track"><div class="fill"></div></div><span class="lbl" dir="auto"><span class="chip" style="display:inline-block;width:8px;height:8px;margin-left:6px;background:${COLORS[j%8]}"></span> ${esc(o.label)}</span></div>`).join("")}</div>
+      <div class="timeline" id="dcT${i}"></div>
+      <div class="dfoot"><span id="dcS${i}">Awaiting decision</span><span id="dcM${i}"></span></div>
+    </div>`;
+  };
+  $("colL").innerHTML = sessionQs.slice(0, half).map((q, i) => card(q, i)).join("");
+  $("colR").innerHTML = sessionQs.slice(half).map((q, i) => card(q, i + half)).join("");
+  resetSession();
+}
+
+function resetSession() {
+  session++; inflight = false; finalWanted = false; lastSendAt = -1e9;
+  segs = []; lats = []; lags = [];
+  $("log").innerHTML = ""; updateStats();
+  (sessionQs || []).forEach((q, i) => {
+    const v = $("dcV"+i); if (!v) return;
+    v.textContent = "Awaiting audio"; v.className = "v wait"; $("dcC"+i).textContent = "–";
+    $("dcT"+i).innerHTML = ""; $("dcS"+i).textContent = "Awaiting decision"; $("dcM"+i).textContent = "";
+    document.querySelectorAll(`#dc${i} .opt`).forEach(o => { o.classList.remove("win"); o.querySelector(".fill").style.width = "0"; o.querySelector(".p").textContent = "–"; });
+  });
+  drawWave();
+}
+
+const avg = xs => xs.reduce((a, b) => a + b, 0) / xs.length;
+function updateStats() {
+  $("stSeg").textContent = segs.filter(s => s.status === "done").length;
+  $("stLat").textContent = lats.length ? (avg(lats.slice(-10)) / 1000).toFixed(1) + " s" : "–";
+  $("stLag").textContent = lags.length ? avg(lags.slice(-10)).toFixed(1) + " s" : "–";
+}
+function log(msg, err=false) {
+  const d = document.createElement("div"); if (err) d.className = "e";
+  d.textContent = new Date().toLocaleTimeString() + "  " + msg; $("log").prepend(d);
+  while ($("log").childElementCount > 200) $("log").lastChild.remove();
+}
+
+/* ------------------------------------------------------------------ audio helpers */
+async function decodeTo16k(file) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  let decoded;
+  try { decoded = await ctx.decodeAudioData(await file.arrayBuffer()); } finally { ctx.close(); }
+  const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(decoded.duration * SR)), SR);
+  const s = off.createBufferSource(); s.buffer = decoded; s.connect(off.destination); s.start();
+  return (await off.startRendering()).getChannelData(0);
+}
+function resample(f32, from) {
+  if (from === SR) return f32;
+  const ratio = from / SR, n = Math.floor(f32.length / ratio), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {           // box filter + decimate
+    const a = Math.floor(i * ratio), b = Math.min(f32.length, Math.floor((i + 1) * ratio));
+    let s = 0; for (let j = a; j < b; j++) s += f32[j]; out[i] = s / Math.max(1, b - a);
+  }
+  return out;
+}
+function wavBase64(f32) {
+  const n = f32.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0,"RIFF"); v.setUint32(4, 36 + n*2, true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true);
+  v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,SR,true); v.setUint32(28,SR*2,true);
+  v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,n*2,true);
+  for (let i = 0; i < n; i++) { const s = Math.max(-1, Math.min(1, f32[i])); v.setInt16(44 + i*2, s < 0 ? s*0x8000 : s*0x7fff, true); }
+  const bytes = new Uint8Array(buf); let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+/* ------------------------------------------------------------------ sources */
+$("pickFile").onclick = () => $("fileIn").click();
+$("fileIn").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  stopAll(); stopMic();
+  mode = "file"; srcName = f.name; $("srcName").textContent = f.name;
+  $("pickFile").classList.add("on"); $("useMic").classList.remove("on");
+  const isVideo = f.type.startsWith("video");
+  const url = URL.createObjectURL(f);
+  $("media").innerHTML = isVideo ? `<video playsinline></video>` : `<div class="empty ar" style="font-size:15px">🎧 ${esc(f.name)}<br><span class="hint">Audio only</span></div><audio></audio>`;
+  mediaEl = $("media").querySelector(isVideo ? "video" : "audio"); mediaEl.src = url;
+  mediaEl.addEventListener("ended", () => { finalWanted = running; running = false; setPlayIcon(false); schedule(); });
+  mediaEl.addEventListener("seeked", () => { lastSendAt = -1e9; drawWave(); });
+  mediaEl.addEventListener("play", () => setPlayIcon(true));
+  mediaEl.addEventListener("pause", () => setPlayIcon(false));
+  mediaEl.addEventListener("timeupdate", schedule);   // keeps going in a background tab
+  pcm = null; $("playBtn").disabled = true; log("Extracting audio from " + f.name + "…");
+  try {
+    pcm = await decodeTo16k(f);
+    log(`Audio ready: ${fmt(pcm.length / SR)} at 16 kHz mono`);
+    $("playBtn").disabled = false; resetSession();
+  } catch (err) { log("Could not decode audio: " + err.message, true); toast("This browser could not read the audio track of that file."); }
+};
+
+$("useMic").onclick = async () => {
+  stopAll();
+  mode = "mic"; mediaEl = null; pcm = null; srcName = "Microphone";
+  $("srcName").textContent = "Microphone"; $("useMic").classList.add("on"); $("pickFile").classList.remove("on");
+  $("media").innerHTML = `<canvas class="micviz" id="micCv"></canvas>`;
+  $("playBtn").disabled = false; resetSession(); drawMic();
+};
+
+async function startMic() {
+  micStream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1, echoCancellation:false, noiseSuppression:false, autoGainControl:true}});
+  micCtx = new (window.AudioContext || window.webkitAudioContext)(); micRate = micCtx.sampleRate;
+  const src = micCtx.createMediaStreamSource(micStream);
+  micProc = micCtx.createScriptProcessor(4096, 1, 1);
+  micProc.onaudioprocess = e => {
+    const d = new Float32Array(e.inputBuffer.getChannelData(0)); micChunks.push(d);
+    let total = micChunks.reduce((a, c) => a + c.length, 0);
+    while (total - micChunks[0].length > 31 * micRate) total -= micChunks.shift().length;  // keep ~30 s
+    let s = 0; for (let i = 0; i < d.length; i += 8) s += d[i]*d[i]; micLevel = Math.sqrt(s / (d.length/8));
+    schedule();
+  };
+  src.connect(micProc); micProc.connect(micCtx.destination);
+  micChunks = []; micStart = performance.now();
+}
+function micWindow(seconds) {
+  const need = Math.floor(seconds * micRate);
+  const total = micChunks.reduce((a, c) => a + c.length, 0), n = Math.min(need, total);
+  const out = new Float32Array(n); let o = n;
+  for (let k = micChunks.length - 1; k >= 0 && o > 0; k--) {
+    const c = micChunks[k], take = Math.min(c.length, o);
+    out.set(c.subarray(c.length - take), o - take); o -= take;
+  }
+  return resample(out, micRate);
+}
+function stopMic() {
+  if (micProc) { micProc.disconnect(); micProc = null; }
+  if (micCtx) { micCtx.close(); micCtx = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+}
+
+/* ------------------------------------------------------------------ run loop */
+function setPlayIcon(on) {
+  $("playIco").innerHTML = on ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>' : '<path d="M7 4v16l13-8z"/>';
+}
+$("playBtn").onclick = async () => {
+  if (mode === "file" && mediaEl) {
+    if (mediaEl.paused) { running = true; finalWanted = false; await mediaEl.play(); }
+    else { mediaEl.pause(); }
+  } else if (mode === "mic") {
+    if (!running) {
+      try { await startMic(); running = true; setPlayIcon(true); log("Listening to the microphone"); }
+      catch (err) { toast("Microphone not available: " + err.message); }
+    } else {
+      // Decide right away on the audio up to this click. The update still running
+      // is dropped: it would only delay the final answer with older audio.
+      running = false; setPlayIcon(false);
+      const end = nowSec();
+      const audio = micWindow($("finalAll").checked ? FINAL_MAX_SEC : win());
+      stopMic(); micStart = 0;
+      session++; inflight = false;
+      segs.forEach(s => { if (s.status === "sending") s.status = "cancelled"; });
+      log("Microphone stopped");
+      sendWindow(end, audio, true);
+    }
+  }
+};
+$("resetBtn").onclick = () => { stopAll(); if (mediaEl) mediaEl.currentTime = 0; resetSession(); };
+
+function stopAll() {
+  running = false; finalWanted = false;
+  if (mediaEl && !mediaEl.paused) mediaEl.pause();
+  if (mode === "mic") stopMic();
+  session++; inflight = false;
+  setPlayIcon(false);
+}
+
+const nowSec = () => mode === "file" ? (mediaEl ? mediaEl.currentTime : 0)
+                                     : (micStart ? (performance.now() - micStart) / 1000 : 0);
+
+// Decide whether an update is due. Called from the animation loop (smooth while
+// visible) and from the audio callbacks below, which keep running when the tab is
+// in the background, where browsers pause animation frames.
+function schedule() {
+  if (inflight) return;
+  if (mode === "file" && mediaEl && pcm) {
+    const t = mediaEl.currentTime;
+    if (running && !mediaEl.paused && t >= minFirst() && t - lastSendAt >= hop()) sendWindow(t);
+    else if (finalWanted) { finalWanted = false; if (t - lastSendAt > 0.5) sendWindow(t); }
+  } else if (mode === "mic" && running && micStart) {
+    const t = nowSec();
+    if (t >= minFirst() && t - lastSendAt >= hop()) sendWindow(t);
+  }
+}
+
+function tick() {
+  if (mode === "file" && mediaEl && pcm) $("clock").textContent = fmt(mediaEl.currentTime) + " / " + fmt(pcm.length / SR);
+  else if (mode === "mic") $("clock").textContent = running ? fmt(nowSec()) : "00:00";
+  schedule();
+  if (mode) drawWave();
+  requestAnimationFrame(tick);
+}
+
+async function sendWindow(end, audio = null, final = false) {
+  const W = win();
+  audio = audio || (mode === "file"
+    ? pcm.subarray(Math.floor(Math.max(0, end - W) * SR), Math.min(pcm.length, Math.floor(end * SR)))
+    : micWindow(W));
+  if (audio.length < SR * 0.5) return;
+  const seg = {i: segs.length, start: Math.max(0, end - audio.length / SR), end, status: "sending", answers: {}, final};
+  segs.push(seg); lastSendAt = end; inflight = true;
+  const my = session, t0 = performance.now(), b64 = wavBase64(audio), qs = payloadQuestions();
+  // One request per question: each card updates as soon as its answer is ready.
+  // Ollama reuses the processed audio, so questions after the first are cheap.
+  for (const [n, id] of Object.keys(qs).entries()) {
+    try {
+      const r = await fetch("/v1/systemone", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({model:"AADI-E4B", state:{audio_base64: b64}, questions: {[id]: qs[id]}})});
+      const d = await r.json();
+      if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail || d));
+      if (my !== session) return;               // source changed or reset meanwhile
+      seg.answers[id] = d.answers[id];
+      showAnswer(seg, n, d.answers[id], (performance.now() - t0) / 1000);
+    } catch (err) {
+      if (my !== session) return;
+      seg.status = "error"; log(`${fmt(seg.start)}–${fmt(seg.end)} failed: ${err.message}`, true);
+      inflight = false; updateStats(); return;
+    }
+  }
+  seg.ms = performance.now() - t0; seg.status = "done";
+  seg.lag = Math.max(0, nowSec() - seg.end);        // how far behind the audio the last card is
+  if (final || (mode === "file" && mediaEl && mediaEl.paused)) seg.lag = seg.ms / 1000;
+  lats.push(seg.ms); lags.push(seg.lag);
+  log(`${final ? "Final: " : ""}${fmt(seg.start)}–${fmt(seg.end)} → ${Object.keys(qs).length} decisions in ${(seg.ms/1000).toFixed(1)} s`);
+  inflight = false; updateStats();
+}
+
+function showAnswer(seg, i, a, elapsed) {
+  const q = sessionQs[i], view = optionView(q);
+  const winKey = q.type === "noul" ? (a.noul ? "Yes" : "No") : q.type === "choice" ? a.choice : String(a.score);
+  const winIdx = view.findIndex(o => o.key === winKey);
+  document.querySelectorAll(`#dc${i} .opt`).forEach(row => {
+    const p = a.probabilities[row.dataset.k] ?? 0;
+    row.querySelector(".fill").style.width = (p * 100).toFixed(1) + "%";
+    row.querySelector(".p").textContent = (p * 100).toFixed(0) + "%";
+    row.classList.toggle("win", row.dataset.k === winKey);
+  });
+  const v = $("dcV"+i); v.className = "v"; v.textContent = view[winIdx]?.label ?? winKey;
+  $("dcC"+i).textContent = "confidence " + (a.confidence * 100).toFixed(0) + "%";
+  $("dcS"+i).textContent = `${seg.final ? "Final · " : ""}Heard ${fmt(seg.start)}–${fmt(seg.end)}`;
+  $("dcM"+i).textContent = `+${elapsed.toFixed(1)} s`;
+  const chip = document.createElement("span");
+  chip.className = "chip" + (a.confidence < 0.6 ? " low" : "") + (seg.final ? " final" : "");
+  chip.style.background = COLORS[winIdx % 8];
+  chip.title = `${fmt(seg.start)}–${fmt(seg.end)}: ${view[winIdx]?.label} (${(a.confidence*100).toFixed(0)}%)`;
+  const tl = $("dcT"+i); tl.appendChild(chip);
+  while (tl.childElementCount > MAX_CHIPS) tl.firstChild.remove();
+  const card = $("dc"+i); card.classList.add("flash"); setTimeout(() => card.classList.remove("flash"), 400);
+}
+
+/* ------------------------------------------------------------------ waveform */
+let peaks = null, peaksFor = null;
+function drawWave() {
+  const cv = $("waveCv"); if (!cv || $("live").classList.contains("hidden")) return;
+  const W = cv.clientWidth, H = cv.clientHeight, dpr = devicePixelRatio || 1;
+  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  if (mode === "file" && pcm) {
+    const dur = pcm.length / SR, X = t => t / dur * W;
+    if (peaksFor !== pcm || peaks.length !== W) {
+      peaks = new Float32Array(W); const step = Math.max(1, Math.floor(pcm.length / W));
+      for (let x = 0; x < W; x++) { let m = 0; for (let j = x*step; j < Math.min(pcm.length, (x+1)*step); j += 4) m = Math.max(m, Math.abs(pcm[j])); peaks[x] = m; }
+      peaksFor = pcm;
+    }
+    const last = segs[segs.length - 1];
+    if (last) {   // the window being scored (amber) or last scored (teal)
+      g.fillStyle = last.status === "sending" ? "rgba(251,191,36,.22)" : last.status === "error" ? "rgba(248,113,113,.2)" : "rgba(45,212,191,.14)";
+      g.fillRect(X(last.start), 0, X(last.end) - X(last.start), H);
+    }
+    const px = mediaEl ? X(mediaEl.currentTime) : 0;
+    for (let x = 0; x < W; x++) { const h = Math.max(1, peaks[x] * H * 0.9); g.fillStyle = x < px ? "#2dd4bf" : "#2a3d61"; g.fillRect(x, (H - h) / 2, 1, h); }
+    g.fillStyle = "rgba(230,237,247,.55)";            // a tick for every update
+    segs.forEach(s => { if (s.status === "done") g.fillRect(X(s.end) - 0.5, 0, 1, 5); });
+    g.fillStyle = "#fff"; g.fillRect(px, 0, 1.5, H);
+  } else {
+    g.fillStyle = "#5b6c8a"; g.font = "12px Inter"; g.textAlign = "center";
+    g.fillText(mode === "mic" ? `Microphone · updates every ${hop()} s from the last ${win()} s` : "Waveform appears here", W / 2, H / 2 + 4);
+  }
+}
+$("wave").onclick = e => {
+  if (mode !== "file" || !mediaEl || !pcm) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  mediaEl.currentTime = (e.clientX - r.left) / r.width * (pcm.length / SR);
+};
+function drawMic() {
+  const cv = $("micCv"); if (!cv || mode !== "mic") return;
+  const W = cv.clientWidth, H = cv.clientHeight; if (cv.width !== W) { cv.width = W; cv.height = H; }
+  const g = cv.getContext("2d"); g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(0, 0, W, H);
+  const r = 30 + Math.min(1, micLevel * 6) * Math.min(W, H) * 0.3;
+  g.beginPath(); g.arc(W/2, H/2, r, 0, Math.PI * 2); g.fillStyle = running ? "rgba(45,212,191,.35)" : "rgba(91,108,138,.25)"; g.fill();
+  g.fillStyle = "#e6edf7"; g.font = "600 14px Inter"; g.textAlign = "center";
+  g.fillText(running ? "Listening…" : "Press ▶ to start listening", W/2, H/2 + 5);
+  requestAnimationFrame(drawMic);
+}
+window.addEventListener("resize", drawWave);
+
+/* ------------------------------------------------------------------ misc */
+function download(name, text) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type:"application/json"})); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$("dlResults").onclick = () => {
+  const out = {source: srcName, update_every_sec: hop(), window_sec: win(), questions: sessionQs,
+    updates: segs.filter(s => s.status === "done").map(s => ({start: +s.start.toFixed(2), end: +s.end.toFixed(2), latency_ms: Math.round(s.ms), lag_sec: +s.lag.toFixed(2), answers: s.answers}))};
+  download("aadi-results.json", JSON.stringify(out, null, 2));
+};
+let toastT;
+function toast(msg) {
+  let t = document.querySelector(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; document.body.appendChild(t); }
+  t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 5000);
+}
+
+load(); renderSetup(); loadModels(); checkHealth(); requestAnimationFrame(tick);
+</script>
+</body>
+</html>
